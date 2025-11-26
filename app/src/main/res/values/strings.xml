@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">IMCApp</string>
+    <string-array name="types">
+        <item>Sédentaire</item>
+        <item>Faible</item>
+        <item>Actif</item>
+        <item>Sportif</item>
+        <item>Athlète</item>
+    </string-array>
+</resources>

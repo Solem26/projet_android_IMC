@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Nom -->
+        <EditText
+            android:id="@+id/etNom"
+            android:hint="Nom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Prénom -->
+        <EditText
+            android:id="@+id/etPrenom"
+            android:hint="Prénom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Date de naissance -->
+        <EditText
+            android:id="@+id/etDateNaissance"
+            android:hint="Date de naissance (JJ/MM/AAAA)"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Sexe -->
+        <RadioGroup
+            android:id="@+id/rgSexe"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <RadioButton android:id="@+id/rbHomme" android:text="Homme" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <RadioButton android:id="@+id/rbFemme" android:text="Femme" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </RadioGroup>
+
+        <!-- Âge -->
+        <EditText
+            android:id="@+id/etAge"
+            android:hint="Âge"
+            android:inputType="number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Poids avec boutons -->
+        <TextView
+            android:text="Poids (kg)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <Button android:id="@+id/btnDecPoids" android:text="-" android:layout_width="50dp" android:layout_height="50dp"/>
+            <TextView android:id="@+id/tvPoids" android:text="70" android:textSize="18sp" android:gravity="center" android:layout_width="50dp" android:layout_height="50dp"/>
+            <Button android:id="@+id/btnIncPoids" android:text="+" android:layout_width="50dp" android:layout_height="50dp"/>
+        </LinearLayout>
+
+        <!-- Taille -->
+        <EditText
+            android:id="@+id/etTaille"
+            android:hint="Taille (m)"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Type -->
+        <Spinner
+            android:id="@+id/spinnerType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/types"/>
+
+        <!-- Bouton calculer -->
+        <Button
+            android:id="@+id/btnCalculer"
+            android:text="Calculer IMC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Résultat -->
+        <TextView
+            android:id="@+id/tvResultat"
+            android:textSize="18sp"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>
