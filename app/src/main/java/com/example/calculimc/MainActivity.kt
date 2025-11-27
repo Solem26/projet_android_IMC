@@ -8,8 +8,10 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -120,6 +122,23 @@ fun CalculIMCContent(isDarkTheme: Boolean, onThemeChange: (Boolean) -> Unit) {
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
+    // Fonction pour réinitialiser tous les champs
+    fun resetAllFields() {
+        nom = ""
+        prenom = ""
+        dateNaissance = ""
+        age = ""
+        sexe = "Homme"
+        poids = 70
+        taille = ""
+        typeActivite = "Sédentaire"
+        errorNom = ""
+        errorPrenom = ""
+        errorDate = ""
+        errorTaille = ""
+        showResult = false
+    }
+
     if (showResult) {
         // --- Page résultat avec message personnalisé ---
         Column(
@@ -217,8 +236,9 @@ fun CalculIMCContent(isDarkTheme: Boolean, onThemeChange: (Boolean) -> Unit) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            // Bouton pour nouveau calcul qui réinitialise tout
             Button(
-                onClick = { showResult = false },
+                onClick = { resetAllFields() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
@@ -236,277 +256,286 @@ fun CalculIMCContent(isDarkTheme: Boolean, onThemeChange: (Boolean) -> Unit) {
             }
         }
     } else {
-        // --- Page formulaire ---
+        // --- Page formulaire avec défilement vertical ---
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .verticalScroll(rememberScrollState()) // Activation du défilement vertical
         ) {
-
-            // --- Header avec switch thème ---
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Calculateur IMC",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
 
+                // --- Header avec switch thème ---
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isDarkTheme) "🌙" else "☀️",
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(end = 8.dp),
+                        text = "Calculateur IMC",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    Switch(
-                        checked = isDarkTheme,
-                        onCheckedChange = onThemeChange,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                        )
-                    )
-                }
-            }
 
-            // --- Nom ---
-            TextField(
-                value = nom,
-                onValueChange = {
-                    nom = it
-                    errorNom = when {
-                        it.length < 3 -> "Minimum 3 caractères"
-                        it.any { c -> c.isDigit() } -> "Pas de chiffres autorisés"
-                        else -> ""
-                    }
-                },
-                label = { Text("Nom") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            )
-            if (errorNom.isNotEmpty()) Text(errorNom, color = Color.Red, fontSize = 12.sp)
-
-            // --- Prénom ---
-            TextField(
-                value = prenom,
-                onValueChange = {
-                    prenom = it
-                    errorPrenom = when {
-                        it.length < 3 -> "Minimum 3 caractères"
-                        it.any { c -> c.isDigit() } -> "Pas de chiffres autorisés"
-                        else -> ""
-                    }
-                },
-                label = { Text("Prénom") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            )
-            if (errorPrenom.isNotEmpty()) Text(errorPrenom, color = Color.Red, fontSize = 12.sp)
-
-            // --- Date de naissance ---
-            Button(
-                onClick = { datePickerDialog.show() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
-                )
-            ) {
-                Text(
-                    if (dateNaissance.isEmpty()) "Choisir la date de naissance" else dateNaissance,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            if (errorDate.isNotEmpty()) Text(errorDate, color = Color.Red, fontSize = 12.sp)
-            Text("Âge : $age ans", fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
-
-            // --- Sexe ---
-            Text("Sexe :", fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                listOf("Homme", "Femme").forEach { s ->
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 16.dp)
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RadioButton(
-                            selected = sexe == s,
-                            onClick = { sexe = s },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = MaterialTheme.colorScheme.primary,
-                                unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        )
                         Text(
-                            text = s,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(start = 4.dp),
+                            text = if (isDarkTheme) "🌙" else "☀️",
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(end = 8.dp),
                             color = MaterialTheme.colorScheme.onBackground
                         )
+                        Switch(
+                            checked = isDarkTheme,
+                            onCheckedChange = onThemeChange,
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                                uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            )
+                        )
                     }
                 }
-            }
 
-            // --- Poids ---
-            Text("Poids : $poids kg", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = { if (poids > 0) poids-- },
-                    modifier = Modifier.weight(1f),
+                // --- Nom ---
+                TextField(
+                    value = nom,
+                    onValueChange = {
+                        nom = it
+                        errorNom = when {
+                            it.length < 3 -> "Minimum 3 caractères"
+                            it.any { c -> c.isDigit() } -> "Pas de chiffres autorisés"
+                            else -> ""
+                        }
+                    },
+                    label = { Text("Nom") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
-                ) {
-                    Text("-", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
-                }
-                Button(
-                    onClick = { poids++ },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
-                    )
-                ) {
-                    Text("+", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-
-            // --- Taille (en cm) ---
-            TextField(
-                value = taille,
-                onValueChange = {
-                    // Filtrer pour n'autoriser que les chiffres
-                    val filtered = it.filter { char -> char.isDigit() }
-                    taille = filtered
-                    errorTaille = if (filtered.isBlank() || filtered.toIntOrNull() == null || filtered.toInt() <= 0) {
-                        "Taille invalide"
-                    } else if (filtered.toInt() > 250) {
-                        "Taille trop grande (max 250 cm)"
-                    } else if (filtered.toInt() < 50) {
-                        "Taille trop petite (min 50 cm)"
-                    } else ""
-                },
-                label = { Text("Taille (cm)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-            )
-            if (errorTaille.isNotEmpty()) Text(errorTaille, color = Color.Red, fontSize = 12.sp)
+                if (errorNom.isNotEmpty()) Text(errorNom, color = Color.Red, fontSize = 12.sp)
 
-            // --- Type activité ---
-            Box(modifier = Modifier.fillMaxWidth()) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    TextField(
-                        value = typeActivite,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Type d'activité") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                            unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
+                // --- Prénom ---
+                TextField(
+                    value = prenom,
+                    onValueChange = {
+                        prenom = it
+                        errorPrenom = when {
+                            it.length < 3 -> "Minimum 3 caractères"
+                            it.any { c -> c.isDigit() } -> "Pas de chiffres autorisés"
+                            else -> ""
+                        }
+                    },
+                    label = { Text("Prénom") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        types.forEach { type ->
-                            DropdownMenuItem(
-                                text = { Text(type, color = MaterialTheme.colorScheme.onBackground) },
-                                onClick = {
-                                    typeActivite = type
-                                    expanded = false
-                                }
+                )
+                if (errorPrenom.isNotEmpty()) Text(errorPrenom, color = Color.Red, fontSize = 12.sp)
+
+                // --- Date de naissance ---
+                Button(
+                    onClick = { datePickerDialog.show() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
+                    )
+                ) {
+                    Text(
+                        if (dateNaissance.isEmpty()) "Choisir la date de naissance" else dateNaissance,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                if (errorDate.isNotEmpty()) Text(errorDate, color = Color.Red, fontSize = 12.sp)
+                Text("Âge : $age ans", fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+
+                // --- Sexe ---
+                Text("Sexe :", fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    listOf("Homme", "Femme").forEach { s ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 16.dp)
+                        ) {
+                            RadioButton(
+                                selected = sexe == s,
+                                onClick = { sexe = s },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = MaterialTheme.colorScheme.primary,
+                                    unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            )
+                            Text(
+                                text = s,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(start = 4.dp),
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
                 }
-            }
 
-            // --- Bouton Calculer ---
-            Button(
-                onClick = {
-                    val t = taille.toIntOrNull()
-                    val valide = nom.isNotBlank() && prenom.isNotBlank() && dateNaissance.isNotBlank() &&
-                            t != null && t in 50..250 && errorNom.isEmpty() && errorPrenom.isEmpty() && errorDate.isEmpty() && errorTaille.isEmpty()
-
-                    if (valide) {
-                        // Convertir la taille de cm en mètres pour le calcul IMC
-                        val tailleMetres = t.toFloat() / 100
-                        val imc = poids / (tailleMetres * tailleMetres)
-                        imcResult = imc
-                        categorieResult = when {
-                            imc < 18.5 -> "Maigreur"
-                            imc in 18.5..24.9 -> "Normal"
-                            imc in 25.0..29.9 -> "Surpoids"
-                            else -> "Obésité"
-                        }
-                        showResult = true
-                    } else {
-                        if (nom.isBlank()) errorNom = "Nom obligatoire"
-                        if (prenom.isBlank()) errorPrenom = "Prénom obligatoire"
-                        if (dateNaissance.isBlank()) errorDate = "Date obligatoire"
-                        if (t == null || t !in 50..250) errorTaille = "Taille invalide (50-250 cm)"
+                // --- Poids ---
+                Text("Poids : $poids kg", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = { if (poids > 0) poids-- },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
+                        )
+                    ) {
+                        Text("-", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                elevation = ButtonDefaults.buttonElevation(4.dp)
-            ) {
-                Text("Calculer IMC", color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp)
+                    Button(
+                        onClick = { poids++ },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5)
+                        )
+                    ) {
+                        Text("+", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+
+                // --- Taille (en cm) ---
+                TextField(
+                    value = taille,
+                    onValueChange = {
+                        // Filtrer pour n'autoriser que les chiffres
+                        val filtered = it.filter { char -> char.isDigit() }
+                        taille = filtered
+                        errorTaille = if (filtered.isBlank() || filtered.toIntOrNull() == null || filtered.toInt() <= 0) {
+                            "Taille invalide"
+                        } else if (filtered.toInt() > 250) {
+                            "Taille trop grande (max 250 cm)"
+                        } else if (filtered.toInt() < 50) {
+                            "Taille trop petite (min 50 cm)"
+                        } else ""
+                    },
+                    label = { Text("Taille (cm)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                )
+                if (errorTaille.isNotEmpty()) Text(errorTaille, color = Color.Red, fontSize = 12.sp)
+
+                // --- Type activité ---
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
+                    ) {
+                        TextField(
+                            value = typeActivite,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Type d'activité") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                                unfocusedContainerColor = if (isDarkTheme) Color(0xFF2D2D2D) else Color(0xFFF5F5F5),
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            types.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(type, color = MaterialTheme.colorScheme.onBackground) },
+                                    onClick = {
+                                        typeActivite = type
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // --- Bouton Calculer ---
+                Button(
+                    onClick = {
+                        val t = taille.toIntOrNull()
+                        val valide = nom.isNotBlank() && prenom.isNotBlank() && dateNaissance.isNotBlank() &&
+                                t != null && t in 50..250 && errorNom.isEmpty() && errorPrenom.isEmpty() && errorDate.isEmpty() && errorTaille.isEmpty()
+
+                        if (valide) {
+                            // Convertir la taille de cm en mètres pour le calcul IMC
+                            val tailleMetres = t.toFloat() / 100
+                            val imc = poids / (tailleMetres * tailleMetres)
+                            imcResult = imc
+                            categorieResult = when {
+                                imc < 18.5 -> "Maigreur"
+                                imc in 18.5..24.9 -> "Normal"
+                                imc in 25.0..29.9 -> "Surpoids"
+                                else -> "Obésité"
+                            }
+                            showResult = true
+                        } else {
+                            if (nom.isBlank()) errorNom = "Nom obligatoire"
+                            if (prenom.isBlank()) errorPrenom = "Prénom obligatoire"
+                            if (dateNaissance.isBlank()) errorDate = "Date obligatoire"
+                            if (t == null || t !in 50..250) errorTaille = "Taille invalide (50-250 cm)"
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    elevation = ButtonDefaults.buttonElevation(4.dp)
+                ) {
+                    Text("Calculer IMC", color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp)
+                }
+
+                // Espace supplémentaire en bas pour permettre un meilleur défilement
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
